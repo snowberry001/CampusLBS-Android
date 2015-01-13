@@ -34,5 +34,13 @@
     </style>
 
     <style name="ButtonBarButton" />
+    
+    <style name="style_titlebar_normal" parent="AppBaseTheme">
+      	<item name="android:homeAsUpIndicator">@android:drawable/ic_delete</item>
+    </style>  
+    
+    
+    
+    <style name="ProgressBarStyle" parent="@android:style/Widget.ProgressBar.Horizontal"/>
 
 </resources>

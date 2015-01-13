@@ -10,6 +10,7 @@ import com.sky.control.MyPagerAdapter;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +33,7 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 
 	private static final boolean AUTO_HIDE = true;
 
-	private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+	private static final int AUTO_HIDE_DELAY_MILLIS = 5000;
 
 	private static final boolean TOGGLE_ON_CLICK = true;
 
@@ -49,10 +51,9 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 	
 	private String[] imagePathArray;
 	
-	
-	
 	private ActionBar actionBar;
 	
+	private int indexId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,17 +64,14 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 	
 		Bundle bundle = getIntent().getExtras();
 		
-		Uri photoUri = bundle.getParcelable("photoUri");
 		String tourId = bundle.getString("tourId");
-		int indexId = Integer.valueOf(bundle.getString("indexId"));
-		
+		indexId = bundle.getInt("indexId");
 		
 		viewPager = (ViewPager) findViewById(R.id.viewPager);
 	
-		// 载入图片资源ID
+		// 载入图片资源路径
 		imagePathArray = getImagePathList(tourId);
 		imageCount = imagePathArray.length;
-		// 将图片装载到数组中
 		imagePathList = new ArrayList<String>(imageCount);
 		String folderPath = Environment.getExternalStorageDirectory().getAbsolutePath() 
 				+ "/tourCampus/images/" + tourId + "/";
@@ -84,11 +82,8 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 		
 		// 设置需要缓存的页面个数
 		viewPager.setOffscreenPageLimit(3);
-		// 设置Adapter
 		viewPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(), imagePathList));
-		// 设置监听，主要是设置点点的背景
 		viewPager.setOnPageChangeListener(this);
-		// 设置ViewPager的默认项
 		viewPager.setCurrentItem(indexId);
 		
 		initFullScreen();
@@ -167,13 +162,6 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-
-		getMenuInflater().inflate(R.menu.photo, menu);
-		return true;
-	}
-
-	@Override
 	public void onPageScrollStateChanged(int arg0) {
 
 
@@ -186,17 +174,45 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 	}
 
 	@Override
-	public void onPageSelected(int arg0) {		
+	public void onPageSelected(int selectedIndex) {		
 		// 设置title
-		actionBar.setTitle((arg0 + 1) + "/" + imageCount);
-		setImageInfor(arg0);
+		actionBar.setTitle((selectedIndex + 1) + "/" + imageCount);
+		setImageInfor(selectedIndex);
 	}
 	
  
     // 设置索引、文字信息 
-	private void setImageInfor(int selectItems) {
+	private void setImageInfor(int index) {
 
 	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.view_photo, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.deletePhoto:
+			deletePhoto();
+			break;
+		default:
+			break;
+		}
+		return true;
+	}
+	
+	// 删除分享照片
+		private void deletePhoto(){
+			Intent intent = new Intent();
+			intent.setClass(PhotoViewActivity.this, PhotoListActivity.class);
+			intent.putExtra("isDeleted", true);
+			intent.putExtra("indexId", indexId);
+			setResult(RESULT_OK, intent);
+			finish();
+		}
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {

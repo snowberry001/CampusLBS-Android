@@ -2,7 +2,7 @@ package com.sky.control;
 
 import java.util.List;
 
-import com.sky.activity.MyPageFragment;
+import com.sky.fragment.MyPageFragment;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -34,13 +34,16 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter{
         //Fragment fragment = ((Fragment) object);
         //container.removeView(fragment.getView());
         //FragmentUtils.removeFragmentRecently(getSupportFragmentManager(), fragment);
+    	
+    	//container.removeView((View) object);
     }
     
     
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
     	// TODO Auto-generated method stub
-    	return super.instantiateItem(container, position);
+    	MyPageFragment fragment = (MyPageFragment) super.instantiateItem(container, position);
+    	return fragment;
     }
     
     @Override

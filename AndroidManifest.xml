@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="9"
+        android:minSdkVersion="11"
         android:targetSdkVersion="14" />
 
     <!-- 自动GPS开启权限 -->
@@ -39,14 +39,16 @@
     <!-- 照相机权限 -->
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" />
+        android:required="false" >        
+    </uses-feature>
 
     <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- 传感器权限 -->
     <uses-feature
         android:name="android.hardware.sensor.accelerometer"
-        android:required="true" />
+        android:required="true" >        
+    </uses-feature>
 
     <application
         android:name="com.sky.application.TourApplication"
@@ -74,16 +76,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.sky.activity.MainActivity" />
+        
+        <activity 
+            android:name="com.sky.activity.MainActivity" >
+        </activity>
         <activity
             android:name="com.sky.activity.NewTourActivity"
-            android:label="@string/title_activity_new_tour" />
+            android:label="@string/title_activity_new_tour">
+        </activity>
         <activity
             android:name="com.sky.activity.LocationActivity"
-            android:label="@string/title_activity_location" />
-
-        <service android:name="com.sky.service.LocationSensorService" />
-
+            android:label="@string/title_activity_location" >            
+        </activity>
+        <service 
+            android:name="com.sky.service.LocationSensorService" >            
+        </service>
         <activity
             android:name="com.sky.activity.PhotoViewActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -99,6 +106,15 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_photo_taken"
             android:theme="@style/FullscreenTheme" >
+        </activity>
+        <activity
+            android:name="com.sky.activity.PhotoShareActivity"
+            android:label="@string/title_activity_photo_share" >
+        </activity>
+        <activity
+            android:name="com.sky.activity.SharePhotoViewActivity"
+            android:label="@string/title_activity_share_photo_view"
+			android:theme="@style/FullscreenTheme" >
         </activity>
     </application>
 

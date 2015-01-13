@@ -1,178 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EEEEEE"
+    android:orientation="vertical" >
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:orientation="vertical"
+        android:paddingLeft="20dp" >
+
+        <EditText
+            android:id="@+id/tourTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
-            android:orientation="vertical">
-        <EditText
-                android:id="@+id/tourTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:paddingLeft="20dp"
-                android:ems="10"
-                android:background="@null"
-                android:hint="你在哪儿玩呢..."
-                android:inputType="textMultiLine"/>
+            android:layout_marginTop="20dp"
+            android:background="@null"
+            android:ems="10"
+            android:hint="在哪个景点..."
+            android:inputType="textMultiLine" />
 
         <LinearLayout
-            	android:id="@+id/locationLayout"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/new_tour_item_height"
-                android:layout_marginTop="40dp"
-                android:background="#DDDDDD"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-            <TextView
-                    android:id="@+id/tourLocationTv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="20dp"
-                    android:gravity="center"
-                    android:text="地理位置"/>
+            android:id="@+id/locationLayout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/new_tour_item_height"
+            android:layout_marginTop="40dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/locationImageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_myplaces" />
 
             <TextView
-                    android:id="@+id/tourLocation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="20dp"
-                    android:gravity="center"
-                    android:text=""/>
+                android:id="@+id/tourLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/normal_origin_item_margin"
+                android:gravity="center"
+                android:text="我的位置"
+                android:textSize="16sp" />
             <TextView
-                    android:id="@+id/tourAccurateLoc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:visibility="invisible"
-                    android:text=""/>
+                android:id="@+id/tourAccurateLoc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:visibility="invisible" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#FFFFFF"
+        android:gravity="center_vertical"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/new_tour_item_height"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/tourStartTimeTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="开始时间"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tourStartTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingLeft="20dp"
+                android:textSize="16sp" />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE" >
+        </View>
+
         <LinearLayout
-                android:layout_width="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/new_tour_item_height"
+            android:paddingLeft="20dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/tourStopTimeTv"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="#DDDDDD"
-                android:gravity="center_vertical"
-                android:orientation="vertical">
-	        <LinearLayout
-	                android:layout_width="match_parent"
-	                android:layout_height="@dimen/new_tour_item_height"
-	                android:gravity="center_vertical"
-	                android:orientation="horizontal">
-	            <TextView
-	                    android:id="@+id/tourStartTimeTv"
-	                    android:layout_width="wrap_content"
-	                    android:layout_height="wrap_content"
-	                    android:paddingLeft="20dp"
-	                    android:gravity="center"
-	                    android:text="开始时间"/>
-	
-	            <TextView
-	                    android:id="@+id/tourStartTime"
-	                    android:layout_width="wrap_content"
-	                    android:layout_height="wrap_content"
-	                    android:paddingLeft="20dp"
-	                    android:gravity="center"
-	                    android:text=""/>
-	        </LinearLayout>
-	        <View android:layout_height="1px" 
-		        android:background="#EEEEEE" 
-		        android:layout_width="fill_parent">	            
-	        </View>
-	        <LinearLayout
-	                android:layout_width="match_parent"
-	                android:layout_height="@dimen/new_tour_item_height"
-	                android:gravity="center_vertical"
-	                android:orientation="horizontal">
-	            <TextView
-	                    android:id="@+id/tourStopTimeTv"
-	                    android:layout_width="wrap_content"
-	                    android:layout_height="wrap_content"
-	                    android:paddingLeft="20dp"
-	                    android:gravity="center"
-	                    android:text="结束时间"/>
-	
-	            <TextView
-	                    android:id="@+id/tourStopTime"
-	                    android:layout_width="wrap_content"
-	                    android:layout_height="wrap_content"
-	                    android:paddingLeft="20dp"
-	                    android:gravity="center"
-	                    android:text=""/>
-	        </LinearLayout>
-    	    <View android:layout_height="1px" 
-		        android:background="#EEEEEE" 
-		        android:layout_width="fill_parent">	            
-	        </View>
-	        <LinearLayout
-	                android:layout_width="match_parent"
-	                android:layout_height="@dimen/new_tour_item_height"
-	                android:gravity="center_vertical"
-	                android:orientation="horizontal">
-	            <TextView
-	                    android:id="@+id/tourRunTimeTv"
-	                    android:layout_width="wrap_content"
-	                    android:layout_height="wrap_content"
-	                    android:paddingLeft="20dp"
-	                    android:gravity="center"
-	                    android:text="运行时间"/>
-	
-	            <TextView
-	                    android:id="@+id/tourRunTime"
-	                    android:layout_width="wrap_content"
-	                    android:layout_height="wrap_content"
-	                    android:paddingLeft="20dp"
-	                    android:gravity="center"
-	                    android:text=""/>
-	        </LinearLayout>
-	    </LinearLayout>
+                android:gravity="center"
+                android:text="结束时间"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tourStopTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingLeft="20dp"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE" >
+        </View>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/new_tour_item_height"
+            android:paddingLeft="20dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/tourRunTimeTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="运行时间"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tourRunTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingLeft="20dp"
+                android:textSize="16sp" />
+        </LinearLayout>
     </LinearLayout>
-	
-    
-    
+
     <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/tourStartBtn"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-        <Button
-                android:id="@+id/tourStartBtn"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dip"
-                android:layout_marginRight="10dip"
-                android:layout_marginTop="20dip"
-                android:background="@drawable/btn_style_button_start"
-                android:text="开始"/>
+            android:layout_height="@dimen/new_tour_button_height"
+            android:layout_marginTop="30dip"
+            android:background="@drawable/btn_style_button_start"
+            android:text="开始" />
 
         <Button
-                android:id="@+id/tourStopBtn"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dip"
-                android:layout_marginRight="10dip"
-                android:layout_marginTop="10dip"
-                android:background="@drawable/btn_style_button_stop"
-                android:text="结束"
-                android:visibility="gone"/>
+            android:id="@+id/tourStopBtn"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/new_tour_button_height"
+            android:layout_marginTop="10dip"
+            android:background="@drawable/btn_style_button_stop"
+            android:text="结束"
+            android:visibility="gone" />
 
         <Button
-                android:id="@+id/tourCancelBtn"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dip"
-                android:layout_marginLeft="10dip"
-                android:layout_marginRight="10dip"
-                android:layout_marginTop="15dip"
-                android:background="@drawable/btn_style_cancel"
-                android:text="取消"
-                android:textColor="#ffffff"/>
+            android:id="@+id/tourCancelBtn"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/new_tour_button_height"
+            android:layout_marginTop="15dip"
+            android:background="@drawable/btn_style_cancel"
+            android:text="取消"
+            android:textColor="#FFFFFF" />
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

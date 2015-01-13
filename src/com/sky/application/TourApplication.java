@@ -1,9 +1,8 @@
 package com.sky.application;
 
-import java.util.HashMap;
-
 import android.app.Application;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,8 +14,12 @@ import com.baidu.location.LocationClientOption.LocationMode;
 import com.baidu.mapapi.BMapManager;
 import com.baidu.mapapi.MKGeneralListener;
 import com.baidu.mapapi.map.MKEvent;
-import com.baidu.platform.comapi.basestruct.GeoPoint;
-import com.sky.activity.LocationActivity.MyLocationListener;
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.sky.activity.R;
 
 
 public class TourApplication extends Application {
@@ -33,14 +36,46 @@ public class TourApplication extends Application {
 	
 	public TextView locationTv;
 	public TextView accurateLocTv;
+	
+	private static DisplayImageOptions options;
     
     @Override
     public void onCreate() {
 	    super.onCreate();
+	    
+	    options = new DisplayImageOptions.Builder()
+		.showImageOnLoading(R.drawable.ic_stub)
+		.showImageForEmptyUri(R.drawable.ic_empty)
+		.showImageOnFail(R.drawable.ic_error)
+		.cacheInMemory(true)
+		.cacheOnDisk(true)
+		.considerExifParams(true)
+		.bitmapConfig(Bitmap.Config.RGB_565)
+		.build();
+	    
+	    initImageLoader(getApplicationContext());
+	    
 		mInstance = this;
 		initEngineManager(this);
 	}
 	
+    // 初始化imageLoader
+    public static void initImageLoader(Context context) {
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
+				.threadPriority(Thread.NORM_PRIORITY - 2)
+				.denyCacheImageMultipleSizesInMemory()
+				.diskCacheFileNameGenerator(new Md5FileNameGenerator())
+				.diskCacheSize(50 * 1024 * 1024) // 50 Mb
+				.tasksProcessingOrder(QueueProcessingType.LIFO)
+				.writeDebugLogs() // Remove for release app
+				.defaultDisplayImageOptions(options)
+				.build();
+		// Initialize ImageLoader with configuration.
+		ImageLoader.getInstance().init(config);
+	}
+    
+    
+    // 初始化百度地图
 	public void initEngineManager(Context context) {
         if (mBMapManager == null) {
             mBMapManager = new BMapManager(context);

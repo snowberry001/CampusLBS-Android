@@ -10,15 +10,13 @@ import android.graphics.BitmapFactory.Options;
 public class BitmapUtil {
 	
 	// 压缩图片
-	public static Bitmap copressImage(String imgPath){ 
+	public static Bitmap copressImage(String imgPath, float imagew, float imageh){ 
 	    File picture = new File(imgPath); 
 	    Options bitmapFactoryOptions = new BitmapFactory.Options(); 
 	    //下面这个设置是将图片边界不可调节变为可调节 
 	    bitmapFactoryOptions.inJustDecodeBounds = true; 
 	    bitmapFactoryOptions.inSampleSize = 2;  
 	    Bitmap bmap = BitmapFactory.decodeFile(picture.getAbsolutePath(), bitmapFactoryOptions); 
-	    float imagew = 150; 
-	    float imageh = 150; 
 	    int yRatio = (int) Math.ceil(bitmapFactoryOptions.outHeight / imageh); 
 	    int xRatio = (int) Math.ceil(bitmapFactoryOptions.outWidth / imagew); 
 	    if (yRatio > 1 || xRatio > 1) { 
@@ -38,26 +36,24 @@ public class BitmapUtil {
 	
 	
 	// 调整图片大小
-	public static Bitmap resizeImage(String imgPath){
+	public static Bitmap resizeImage(String imgPath, int newWidth, int newHeight){
 		File picture = new File(imgPath); 
 	    Options bitmapFactoryOptions = new BitmapFactory.Options(); 
 	    //下面这个设置是将图片边界不可调节变为可调节 
 	    bitmapFactoryOptions.inJustDecodeBounds = true; 
 	    bitmapFactoryOptions.inSampleSize = 2;  
 	    Bitmap bitmap = BitmapFactory.decodeFile(picture.getAbsolutePath(), bitmapFactoryOptions); 
-		int newWidth = 85;
-		int newHeight = 85;
 		float oldWidth = bitmap.getWidth(); 
-        float oldheight = bitmap.getHeight();
+        float oldHeight = bitmap.getHeight();
         // 创建操作图片用的matrix对象 
         Matrix matrix = new Matrix(); 
         // 计算宽高缩放率 
         float scaleWidth = ((float) newWidth) / oldWidth; 
-        float scaleHeight = ((float) newHeight) / oldheight; 
+        float scaleHeight = ((float) newHeight) / oldHeight; 
         // 缩放图片动作 
         matrix.postScale(scaleWidth, scaleHeight); 
         Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0, 
-        		(int) oldWidth, (int) oldheight, matrix, true); 
+        		(int) oldWidth, (int) oldHeight, matrix, true); 
         return newBitmap; 
 	}
 	

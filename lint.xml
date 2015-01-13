@@ -4,6 +4,10 @@
         <ignore path="src/com/sky/activity/PhotoViewActivity.java" />
     </issue>
     <issue id="NewApi">
+        <ignore path="src/com/sky/activity/NewTourActivity.java" />
         <ignore path="src/com/sky/activity/PhotoViewActivity.java" />
+    </issue>
+    <issue id="SimpleDateFormat">
+        <ignore path="src/com/sky/activity/PhotoShareActivity.java" />
     </issue>
 </lint>

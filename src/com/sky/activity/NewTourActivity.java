@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -147,7 +148,6 @@ public class NewTourActivity extends Activity implements OnClickListener,
 		// 取消Tour
 		case R.id.tourCancelBtn:
 			scanPhotos();
-			// startScan();
 			break;
 
 		default:
@@ -215,20 +215,16 @@ public class NewTourActivity extends Activity implements OnClickListener,
 	// 开始Tour
 	private void startTour() {
 
-		String title = tourTitleEt.getText().toString().trim();
-		if (title.isEmpty()) {
-			Toast.makeText(this, "记录下这是哪里~", Toast.LENGTH_SHORT).show();
-			return;
-		}
+		
 		timeHandler.postDelayed(timeRunnable, 1000);
 		tourStartTimetv.setText(getCurrentDateTime());
-		tourStartBtn.setVisibility(View.INVISIBLE);
+		tourStartBtn.setVisibility(View.GONE);
 		tourStopBtn.setVisibility(View.VISIBLE);
-
+		
+		String title = tourTitleEt.getText().toString().trim();
 		String startTime = tourStartTimetv.getText().toString();
 		String location = tourLocationTv.getText().toString();
-		accurateLoc = accurateLoc != null ? accurateLoc : tourAccurateLocTv
-				.getText().toString();
+		accurateLoc = accurateLoc != null ? accurateLoc : tourAccurateLocTv.getText().toString();
 		tourId = dbHelper.createTour(startTime, location, title, accurateLoc);
 
 		createLocationFile();
@@ -253,10 +249,16 @@ public class NewTourActivity extends Activity implements OnClickListener,
 
 	// 停止Tour
 	private void stopTour() {
+		
+		String title = tourTitleEt.getText().toString().trim();
+		if (title.isEmpty()) {
+			Toast.makeText(this, "记录下这是哪里~", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
 		timeHandler.removeCallbacks(timeRunnable);
 		tourStopTimeTv.setText(getCurrentDateTime());
 
-		String title = tourTitleEt.getText().toString();
 		String location = tourLocationTv.getText().toString();
 		accurateLoc = accurateLoc != null ? accurateLoc : tourAccurateLocTv
 				.getText().toString();
@@ -282,31 +284,32 @@ public class NewTourActivity extends Activity implements OnClickListener,
 		if (resultCode == Activity.RESULT_OK && data == null
 				&& requestCode == REQUEST_CODE2) {
 			Intent intent = new Intent();
-			intent.setClass(NewTourActivity.this, PhotoTakenActivity.class);
+			intent.setClass(NewTourActivity.this, PhotoShareActivity.class);
 			intent.putExtra("photoUri", photoUri);
 			intent.putExtra("tourId", String.valueOf(tourId));
 			startActivity(intent);
 		}
 
-		// 拍照取消
-		/*
-		 * if(resultCode == Activity.RESULT_CANCELED && requestCode ==
-		 * REQUEST_CODE2){ String path = getRealPathFromURI(photoUri); if(path
-		 * != null){ File image = new File(path); image.delete(); } }
-		 */
+		// 拍照取消，  删除临时文件
+		if(resultCode == Activity.RESULT_CANCELED && requestCode == REQUEST_CODE2){ 
+			if(photoUri != null){ 
+				File image = new File(photoUri.getPath()); 
+				if(image.exists()){
+					image.delete(); 
+				}
+			}
+		 }
+
 
 	}
 
 	// 根据uri获取真实的文件路径，仅限于Images
-	public String getRealPathFromURI(Uri contentUri) {
+	private String getRealPathFromURI(Uri contentUri) {
 		String realPath = null;
-		String[] proj = new String[] { MediaStore.Images.Media.DATA };
-		Cursor cursor = getContentResolver().query(contentUri, proj, null,
-				null, null);
+		String[] proj = { MediaStore.Images.Media.DATA };
+		Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
 		if (cursor.moveToFirst()) {
-			;
-			int index = cursor
-					.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+			int index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 			realPath = cursor.getString(index);
 		}
 		cursor.close();
@@ -358,16 +361,23 @@ public class NewTourActivity extends Activity implements OnClickListener,
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.camera:
-			Intent intent = new Intent();
-			intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-			photoUri = Uri.fromFile(createImageFile());
-			intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, photoUri);
-			startActivityForResult(intent, REQUEST_CODE2);
+			startCamera();
+			break;
+		case R.id.photo:
+			scanPhotos();
 			break;
 		default:
 			break;
 		}
 		return true;
+	}
+	
+	private void startCamera(){
+		Intent intent = new Intent();
+		intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+		photoUri = Uri.fromFile(createImageFile());
+		intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, photoUri);
+		startActivityForResult(intent, REQUEST_CODE2);
 	}
 
 	private File createImageFile() {
@@ -391,6 +401,7 @@ public class NewTourActivity extends Activity implements OnClickListener,
 	// 返回键对话框
 	private void showDialog() {
 		AlertDialog.Builder builder = new Builder(this);
+		builder.setTitle("提示");
 		builder.setMessage("\n确定放弃此次Tour？\n");
 		builder.setNegativeButton("取消", null);
 		builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {

@@ -35,6 +35,7 @@ public class PhotoListActivity extends Activity implements
 	private List<HashMap<String, String>> imagePathList = null;
 	private String tourId;
 	
+	private final static int REQUEST_CODE1 = 1; // 查看照片
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -86,12 +87,6 @@ public class PhotoListActivity extends Activity implements
 	
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.view_photo, menu);
-		return true;
-	}
-
-	@Override
 	public boolean onItemLongClick(AdapterView<?> view, View v, int index, long lg) {
 		
 		return false;
@@ -105,13 +100,31 @@ public class PhotoListActivity extends Activity implements
 		Intent intent = new Intent();
 		intent.setClass(PhotoListActivity.this, PhotoViewActivity.class);
 		intent.putExtra("tourId", String.valueOf(tourId));
-		intent.putExtra("indexId", indexId);
-		
-		System.out.println(Integer.valueOf(indexId) == index);
-		
-		startActivity(intent);
+		intent.putExtra("indexId", index);
+		startActivityForResult(intent, REQUEST_CODE1);
 		
 		overridePendingTransition(R.anim.zoom_in, 0);
 		
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		// 删除照片
+		if (resultCode == Activity.RESULT_OK && data != null && requestCode == REQUEST_CODE1) {
+			boolean isDeleted = data.getExtras().getBoolean("isDeleted");
+			int indexId = data.getExtras().getInt("indexId");
+			if(isDeleted){
+				String imagePath = imagePathList.get(indexId).get("imagePath");
+				if(imagePath != null){
+					File image = new File(imagePath);
+					if(image.exists()){
+						image.delete();
+					}
+				}
+				imagePathList.remove(indexId);
+				gridView.setAdapter(new MyGridViewAdapter(this, imagePathList));
+			}
+		}
 	}
 }
