@@ -1,20 +1,19 @@
 package com.sky.activity;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.sky.activity.util.SystemUiHider;
 import com.sky.control.MyPagerAdapter;
+import com.sky.db.entity.Photo;
+import com.sky.db.service.PhotoService;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -24,10 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class PhotoViewActivity extends FragmentActivity implements OnPageChangeListener {
 
@@ -41,75 +37,64 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 
 	private SystemUiHider mSystemUiHider;
 
-	
-	// viewpager
 	private ViewPager viewPager;
+	private TextView photoInforTv;
 	
 	private int imageCount = 0;
-	
-	private List<String> imagePathList;
-	
-	private String[] imagePathArray;
+
+	private List<HashMap<String, String>> imageInfoList;
 	
 	private ActionBar actionBar;
 	
+	private String tourId;
+	
 	private int indexId;
+	
+	private PhotoService photoService;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.tour_photo);
+		setContentView(R.layout.tour_photo_fullscreen);
 		
 		actionBar = getActionBar();
 	
-		Bundle bundle = getIntent().getExtras();
-		
-		String tourId = bundle.getString("tourId");
+		Bundle bundle = getIntent().getExtras();		
+		tourId = bundle.getString("tourId");
 		indexId = bundle.getInt("indexId");
-		
+				
 		viewPager = (ViewPager) findViewById(R.id.viewPager);
+		photoInforTv = (TextView) findViewById(R.id.photoInfor);
 	
-		// 载入图片资源路径
-		imagePathArray = getImagePathList(tourId);
-		imageCount = imagePathArray.length;
-		imagePathList = new ArrayList<String>(imageCount);
-		String folderPath = Environment.getExternalStorageDirectory().getAbsolutePath() 
-				+ "/tourCampus/images/" + tourId + "/";
+		photoService = PhotoService.getInstacne(getApplicationContext());
 		
-		for (int i = 0; i < imageCount; i++) {
-			imagePathList.add(folderPath + imagePathArray[i]);
-		}
+		// 载入图片资源路径
+		initAdapterData();
 		
 		// 设置需要缓存的页面个数
 		viewPager.setOffscreenPageLimit(3);
-		viewPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(), imagePathList));
+		viewPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(), imageInfoList));
 		viewPager.setOnPageChangeListener(this);
 		viewPager.setCurrentItem(indexId);
 		
 		initFullScreen();
+
+		setPhotoInfor(indexId);
+	}
+	
+	private void initAdapterData(){			
 		
-		// 设置title
-		actionBar.setTitle((indexId + 1) + "/" + imageCount);
-	}
-	
-	// 获取指定tour对应的所有照片
-	private String[] getImagePathList(String tourId){
-		String folderPath = Environment.getExternalStorageDirectory().getAbsolutePath() 
-				+ "/tourCampus/images/" + tourId;
-		String[] fileNames = null;
-		File dir =  new File(folderPath);
-		if(dir.exists()){
-			fileNames = dir.list(new FilenameFilter() {				
-				@Override
-				public boolean accept(File dir, String fileName) {
-					String name = fileName.toUpperCase();
-					return name.endsWith(".PNG") || name.endsWith(".JPG");					
-				}
-			});
+		List<Photo> tourPhotoList = photoService.getPhotoListByTourId(tourId);	
+		imageInfoList = new ArrayList<HashMap<String,String>>();
+		for(Photo photo : tourPhotoList){
+			HashMap<String, String> map = new HashMap<String, String>();
+			map.put("imagePath", photo.getPhotoUrl());
+			map.put("photoDesc", photo.getPhotoDesc());
+			imageInfoList.add(map);
 		}
-		return fileNames;
+		imageCount = imageInfoList.size();
+
 	}
-	
 	
 	private void initFullScreen(){
 		final View controlsView = findViewById(R.id.fullscreen_content_controls);
@@ -117,7 +102,6 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 		mSystemUiHider = SystemUiHider.getInstance(this, viewPager, HIDER_FLAGS);
 		mSystemUiHider.setup();
 		mSystemUiHider.setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
-					// Cached values.
 					int mControlsHeight;
 					int mShortAnimTime;
 
@@ -139,21 +123,17 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 						}
 
 						if (visible && AUTO_HIDE) {
-							// Schedule a hide().
 							delayedHide(AUTO_HIDE_DELAY_MILLIS);
 						}
 					}
 				});
-
-		// Set up the user interaction to manually show or hide the system UI.
+		
 		viewPager.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				if (TOGGLE_ON_CLICK) {
-					System.out.println(TOGGLE_ON_CLICK + "--click true---");
 					mSystemUiHider.toggle();
 				} else {
-					System.out.println(TOGGLE_ON_CLICK + "--click false---");
 					mSystemUiHider.show();
 				}
 			}
@@ -175,20 +155,19 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 
 	@Override
 	public void onPageSelected(int selectedIndex) {		
-		// 设置title
-		actionBar.setTitle((selectedIndex + 1) + "/" + imageCount);
-		setImageInfor(selectedIndex);
+		setPhotoInfor(selectedIndex);
 	}
 	
  
-    // 设置索引、文字信息 
-	private void setImageInfor(int index) {
-
+    // 设置title索引、文字信息 
+	private void setPhotoInfor(int selectedIndex) {
+		actionBar.setTitle((selectedIndex + 1) + "/" + imageCount);
+		photoInforTv.setText(imageInfoList.get(selectedIndex).get("photoDesc"));
 	}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.view_photo, menu);
+		getMenuInflater().inflate(R.menu.photo_view_menu, menu);
 		return true;
 	}
 	
@@ -205,14 +184,14 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 	}
 	
 	// 删除分享照片
-		private void deletePhoto(){
-			Intent intent = new Intent();
-			intent.setClass(PhotoViewActivity.this, PhotoListActivity.class);
-			intent.putExtra("isDeleted", true);
-			intent.putExtra("indexId", indexId);
-			setResult(RESULT_OK, intent);
-			finish();
-		}
+	private void deletePhoto(){
+		Intent intent = new Intent();
+		intent.setClass(PhotoViewActivity.this, PhotoListActivity.class);
+		intent.putExtra("isDeleted", true);
+		intent.putExtra("indexId", indexId);
+		setResult(RESULT_OK, intent);
+		finish();
+	}
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -228,8 +207,7 @@ public class PhotoViewActivity extends FragmentActivity implements OnPageChangeL
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
-
-		delayedHide(100);
+		delayedHide(AUTO_HIDE_DELAY_MILLIS);
 	}
 
 	View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {

@@ -2,27 +2,18 @@ package com.sky.activity;
 
 import android.os.Bundle;
 import android.app.Activity;
-import android.view.Menu;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import com.sky.control.MyGridViewAdapter;
+import com.sky.db.entity.Photo;
+import com.sky.db.service.PhotoService;
 
 import android.content.Intent;
-import android.media.MediaScannerConnection;
-import android.media.MediaScannerConnection.MediaScannerConnectionClient;
-import android.net.Uri;
-import android.os.Environment;
-import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -31,19 +22,26 @@ import android.widget.AdapterView.OnItemLongClickListener;
 public class PhotoListActivity extends Activity implements
 					OnItemClickListener, OnItemLongClickListener {
 
+	private TextView nonePhotoTv;
 	private GridView gridView;
 	private List<HashMap<String, String>> imagePathList = null;
+	private MyGridViewAdapter gridViewAdapter = null;
 	private String tourId;
 	
 	private final static int REQUEST_CODE1 = 1; // 查看照片
 	
+	private PhotoService photoService;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.photo_list);
+		setContentView(R.layout.photo_grid_view);
 		
+		nonePhotoTv = (TextView) findViewById(R.id.nonePhoto);
 		gridView = (GridView) findViewById(R.id.gridview);
-
+		
+		photoService = PhotoService.getInstacne(getApplicationContext());
+		
 		Bundle bundle = getIntent().getExtras();
 		tourId = bundle.getString("tourId");
 		
@@ -51,40 +49,31 @@ public class PhotoListActivity extends Activity implements
 		
 	}
 	
-	private void initAdapterData(){
+	private void initAdapterData(){			
+		List<Photo> tourPhotoList = photoService.getPhotoListByTourId(tourId);		
+		if(tourPhotoList == null || tourPhotoList.size() == 0){
+			nonePhotoTv.setVisibility(View.VISIBLE);
+        } else {
+        	nonePhotoTv.setVisibility(View.GONE);
+        }
 		
-		String folderPath = Environment.getExternalStorageDirectory().getAbsolutePath() 
-				+ "/tourCampus/images/" + tourId + "/";
-		File folder = new File(folderPath);
-		String[] imageNameArray = null;
-		if(folder.exists()){
-			imageNameArray = folder.list(new FilenameFilter() {
-				@Override
-				public boolean accept(File dir, String fileName) {
-					String name = fileName.toUpperCase();
-					return name.endsWith(".PNG") || name.endsWith(".JPG");
-				}
-			});
-		}
 		imagePathList = new ArrayList<HashMap<String,String>>();
-		if(imageNameArray != null){
-			for(int i = 0; i < imageNameArray.length; i++){
-				HashMap<String, String> map = new HashMap<String, String>();
-				map.put("index", String.valueOf(i));
-				map.put("imagePath", folderPath + imageNameArray[i]);
-				imagePathList.add(map);
-			}
+		for(Photo photo : tourPhotoList){
+			HashMap<String, String> map = new HashMap<String, String>();
+			map.put("photoId", photo.getPhotoId());
+			map.put("imagePath", photo.getPhotoUrl());
+			map.put("photoDesc", photo.getPhotoDesc());
+			imagePathList.add(map);
 		}
 	}
-	
 	
 	private void initGridView(){
 		initAdapterData();
-		gridView.setAdapter(new MyGridViewAdapter(this, imagePathList));
+		gridViewAdapter = new MyGridViewAdapter(this, imagePathList);
+		gridView.setAdapter(gridViewAdapter);
 		gridView.setOnItemClickListener(this);
 		gridView.setOnItemLongClickListener(this);
 	}
-	
 
 	@Override
 	public boolean onItemLongClick(AdapterView<?> view, View v, int index, long lg) {
@@ -95,14 +84,15 @@ public class PhotoListActivity extends Activity implements
 	@Override
 	public void onItemClick(AdapterView<?> view, View v, int index, long lg) {
 		TextView indexTv = (TextView) v.findViewById(R.id.itemIndex);
-		String indexId = indexTv.getText().toString();
+		String photoDesc = indexTv.getText().toString();
 		
 		Intent intent = new Intent();
 		intent.setClass(PhotoListActivity.this, PhotoViewActivity.class);
-		intent.putExtra("tourId", String.valueOf(tourId));
 		intent.putExtra("indexId", index);
-		startActivityForResult(intent, REQUEST_CODE1);
+		intent.putExtra("tourId", String.valueOf(tourId));		
+		intent.putExtra("photoDesc", photoDesc);
 		
+		startActivityForResult(intent, REQUEST_CODE1);
 		overridePendingTransition(R.anim.zoom_in, 0);
 		
 	}
@@ -116,14 +106,22 @@ public class PhotoListActivity extends Activity implements
 			int indexId = data.getExtras().getInt("indexId");
 			if(isDeleted){
 				String imagePath = imagePathList.get(indexId).get("imagePath");
+				String photoId = imagePathList.get(indexId).get("photoId");
 				if(imagePath != null){
 					File image = new File(imagePath);
 					if(image.exists()){
 						image.delete();
 					}
 				}
-				imagePathList.remove(indexId);
-				gridView.setAdapter(new MyGridViewAdapter(this, imagePathList));
+				photoService.deletePhotoById(photoId);
+				
+				// adapter绑定的数据库add remove时调用notifyDataSetChanged才可以有效
+				imagePathList.remove(indexId);	
+				gridViewAdapter.notifyDataSetChanged();
+				
+				if(imagePathList.size() == 0){
+					nonePhotoTv.setVisibility(View.VISIBLE);
+		        }
 			}
 		}
 	}

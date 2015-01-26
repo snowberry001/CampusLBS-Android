@@ -1,30 +1,25 @@
 package com.sky.activity;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sky.application.TourApplication;
-import com.sky.fragment.ImageGridFragment;
-import com.sky.util.BitmapUtil;
+import com.sky.db.entity.Photo;
+import com.sky.db.service.PhotoService;
+import com.sky.util.DateUtil;
+import com.sky.util.FileUtil;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,13 +27,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class PhotoShareActivity extends FragmentActivity implements OnClickListener, OnCheckedChangeListener{
 
-	
+	private EditText photoDescEt = null;
 	private ImageView sharePhoto1Iv = null;
 	private ImageView sharePhoto2Iv = null;
 	private ImageView sharePhoto3Iv = null;
@@ -57,11 +54,11 @@ public class PhotoShareActivity extends FragmentActivity implements OnClickListe
 	private TextView photoAccurateLocTv;	
 	private TourApplication app = null;
 	
-	private int clickIndex = 0; // 0:null; 1:sharePhoto1; 2:sharePhoto2; 3:sharePhoto3
+	// -1:null; 0:sharePhoto1; 1:sharePhoto2; 2:sharePhoto3
+	private int clickIndex = -1; 
 	
 	private List<String> imageUrlList;
-	
-	private ImageGridFragment gridFragment;
+
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +69,9 @@ public class PhotoShareActivity extends FragmentActivity implements OnClickListe
 			app.initEngineManager(getApplicationContext());
 		}
 		
-		setContentView(R.layout.activity_photo_share);
+		setContentView(R.layout.photo_share_view);
 		
+		photoDescEt = (EditText) findViewById(R.id.photoDesc);
 		sharePhoto1Iv = (ImageView) findViewById(R.id.sharePhoto1);
 		sharePhoto2Iv = (ImageView) findViewById(R.id.sharePhoto2);
 		sharePhoto3Iv = (ImageView) findViewById(R.id.sharePhoto3);
@@ -90,8 +88,8 @@ public class PhotoShareActivity extends FragmentActivity implements OnClickListe
 		imageUrlList.add(firstPhotoUri.toString());
 		
 		// 初始化第一个照片
-		sharePhoto1Iv.setImageBitmap(BitmapUtil.copressImage(firstPhotoUri.getPath(), 150, 150));
-		sharePhoto1Iv.setTag(firstPhotoUri);
+		ImageLoader.getInstance().displayImage(firstPhotoUri.toString(), sharePhoto1Iv);
+
 		photoAddIv.setOnClickListener(this);
 		shareToggleBtn.setOnCheckedChangeListener(this);
 		
@@ -104,25 +102,11 @@ public class PhotoShareActivity extends FragmentActivity implements OnClickListe
 		app.startLocation();
 		app.stopLocation();
 		
-		initShareGrid();
-		
-	}
-	
-	private void initShareGrid(){
-		String tag = ImageGridFragment.class.getSimpleName();
-		gridFragment = (ImageGridFragment)getSupportFragmentManager().findFragmentByTag(tag);
-		if (gridFragment == null) {
-			gridFragment = new ImageGridFragment();
-			gridFragment.setImageUrlList(imageUrlList);
-		}
-		getSupportFragmentManager().beginTransaction().replace(R.id.gridFragment, gridFragment, tag).commit();
-		
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.photo_share, menu);
+		getMenuInflater().inflate(R.menu.photo_share_menu, menu);
 		return true;
 	}
 	
@@ -140,7 +124,41 @@ public class PhotoShareActivity extends FragmentActivity implements OnClickListe
 	
 	// 保存照片记录
 	private void savePhotos(){
+		String photoDesc = photoDescEt.getText().toString().trim();
+		if(photoDesc.isEmpty()){
+			Toast.makeText(this, "记录下你此刻的想法吧~", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(imageUrlList.size() == 0){
+			Toast.makeText(this, "请至少添加一张照片！", Toast.LENGTH_SHORT).show();
+			return;
+		}
 		
+		// 本地数据库保存
+		Photo photo = new Photo();
+		photo.setPhotoTourId(tourId);
+		photo.setPhotoTakenTime(DateUtil.getCurrentDateTime());
+		photo.setPhotoDesc(photoDesc);
+		photo.setPhotoLocation(photoLocationTv.getText().toString());
+		photo.setPhotoAccurateLocation(photoAccurateLocTv.getText().toString());
+		
+		//PhotoService.getInstacne(getApplicationContext()).deletePhoto(null);
+		
+		for (String imageUrl : imageUrlList) {
+			photo.setPhotoUrl(imageUrl);			
+			PhotoService.getInstacne(getApplicationContext()).insertPhoto(photo);
+		}
+		
+		//List<Photo> photoList = PhotoService.getInstacne(getApplicationContext()).getPhotoList(null);
+
+
+		// 分享至服务器
+		if(isShared) {
+			
+		} else {
+			Toast.makeText(this, "照片保存成功！", Toast.LENGTH_SHORT).show();
+			finish();
+		}
 	}
 	
 	@Override
@@ -151,16 +169,16 @@ public class PhotoShareActivity extends FragmentActivity implements OnClickListe
 				startCamera();
 				break;
 			case R.id.sharePhoto1:
-				clickIndex = 1;
-				scanBigPhoto(((Uri)sharePhoto1Iv.getTag()).getPath());
+				clickIndex = 0;
+				scanBigPhoto();
 				break;
 			case R.id.sharePhoto2:
-				clickIndex = 2;
-				scanBigPhoto(((Uri)sharePhoto2Iv.getTag()).getPath());
+				clickIndex = 1;
+				scanBigPhoto();
 				break;
 			case R.id.sharePhoto3:
-				clickIndex = 3;
-				scanBigPhoto(((Uri)sharePhoto3Iv.getTag()).getPath());
+				clickIndex = 2;
+				scanBigPhoto();
 				break;
 			default:
 				break;
@@ -169,36 +187,23 @@ public class PhotoShareActivity extends FragmentActivity implements OnClickListe
 	
 	// 打开照相机
 	private void startCamera(){
+		if(imageUrlList.size() == 3){
+			Toast.makeText(this, "最多添加三张照片分享哦！", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
 		Intent intent = new Intent();
 		intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-		newPhotoUri = Uri.fromFile(createImageFile());
+		newPhotoUri = Uri.fromFile(FileUtil.createImageFile(tourId));
 		intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, newPhotoUri);
 		startActivityForResult(intent, REQUEST_CODE2);
 	}
 	
-	// 创建临时图片文件
-	private File createImageFile() {
-		String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-		String folderPath = Environment.getExternalStorageDirectory()
-				.getAbsolutePath() + "/tourCampus/images/" + tourId + "/";
-		File tempDir = new File(folderPath);
-		if (!tempDir.exists()) {
-			tempDir.mkdirs();
-		}
-		File image = new File(folderPath + timeStamp + ".png");
-		try {
-			image.createNewFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return image;
-	}
-	
 	// 点击ImageView查看大图，可以进行删除操作
-	private void scanBigPhoto(String imagePath){
+	private void scanBigPhoto(){
 		Intent intent = new Intent();
-		intent.setClass(PhotoShareActivity.this, SharePhotoViewActivity.class);
-		intent.putExtra("imagePath", imagePath);
+		intent.setClass(PhotoShareActivity.this, PhotoShareViewActivity.class);
+		intent.putExtra("imageUrl", imageUrlList.get(clickIndex));
 		startActivityForResult(intent, REQUEST_CODE1);
 		overridePendingTransition(R.anim.zoom_in, 0);
 	}
@@ -210,59 +215,61 @@ public class PhotoShareActivity extends FragmentActivity implements OnClickListe
 		// 删除照片
 		if (resultCode == Activity.RESULT_OK && data != null && requestCode == REQUEST_CODE1) {
 			boolean isDeleted = data.getExtras().getBoolean("isDeleted");
-			String imagePath = data.getExtras().getString("imagePath");
+			String imageUrl = data.getExtras().getString("imageUrl");
 			if (isDeleted) {
-				switch(clickIndex){
-					case 1:
-						sharePhoto1Iv.setVisibility(View.GONE);
-						break;
-					case 2:
-						sharePhoto2Iv.setVisibility(View.GONE);
-						break;
-					case 3:
-						sharePhoto3Iv.setVisibility(View.GONE);
-						break;
-					default:
-						break;
-				}
-				File image = new File(imagePath);
-				if(image.exists()){
-					image.delete();
-				}
+				imageUrlList.remove(clickIndex);
+				updateViewOfSharePhotos();
+				deletePhoto(imageUrl);
 			}
 		}
 		
 		// 拍照成功
 		if (resultCode == Activity.RESULT_OK && data == null && requestCode == REQUEST_CODE2) {
-
-			Bitmap bitmap = ImageLoader.getInstance().loadImageSync(newPhotoUri.toString());
-			if(sharePhoto1Iv.getVisibility() == View.GONE){
-				sharePhoto1Iv.setImageBitmap(bitmap);
-				sharePhoto1Iv.setTag(newPhotoUri);
-				sharePhoto1Iv.setVisibility(View.VISIBLE);
-			} else if(sharePhoto2Iv.getVisibility() == View.GONE){				
-				sharePhoto2Iv.setImageBitmap(bitmap);
-				sharePhoto2Iv.setTag(newPhotoUri);
-				sharePhoto2Iv.setVisibility(View.VISIBLE);
-			} else if (sharePhoto3Iv.getVisibility() == View.GONE) {
-				sharePhoto3Iv.setImageBitmap(bitmap);
-				sharePhoto3Iv.setTag(newPhotoUri);
-				sharePhoto3Iv.setVisibility(View.VISIBLE);
-			}
-			
 			imageUrlList.add(newPhotoUri.toString());
-			gridFragment.updateView();
+			updateViewOfSharePhotos();
 		}
 
 		// 拍照取消, 删除临时文件
 		if(resultCode == Activity.RESULT_CANCELED && requestCode == REQUEST_CODE2){ 
 			if(newPhotoUri != null){ 
-				File image = new File(newPhotoUri.getPath()); 
-				image.delete(); 
+				deletePhoto(newPhotoUri.toString());
 			}
 		 }
 	}
 
+	// 更新分享照片
+	private void updateViewOfSharePhotos(){
+		int count = imageUrlList.size();
+		switch(count){
+		case 1:
+			sharePhoto1Iv.setVisibility(View.VISIBLE);
+			ImageLoader.getInstance().displayImage(imageUrlList.get(0), sharePhoto1Iv);
+			sharePhoto2Iv.setVisibility(View.GONE);
+			sharePhoto3Iv.setVisibility(View.GONE);
+			break;
+		case 2:
+			sharePhoto1Iv.setVisibility(View.VISIBLE);
+			sharePhoto2Iv.setVisibility(View.VISIBLE);
+			ImageLoader.getInstance().displayImage(imageUrlList.get(0), sharePhoto1Iv);
+			ImageLoader.getInstance().displayImage(imageUrlList.get(1), sharePhoto2Iv);
+			sharePhoto3Iv.setVisibility(View.GONE);
+			break;
+		case 3:
+			sharePhoto1Iv.setVisibility(View.VISIBLE);
+			sharePhoto2Iv.setVisibility(View.VISIBLE);
+			sharePhoto3Iv.setVisibility(View.VISIBLE);
+			ImageLoader.getInstance().displayImage(imageUrlList.get(0), sharePhoto1Iv);
+			ImageLoader.getInstance().displayImage(imageUrlList.get(1), sharePhoto2Iv);
+			ImageLoader.getInstance().displayImage(imageUrlList.get(2), sharePhoto3Iv);
+			break;
+		default:
+			sharePhoto1Iv.setVisibility(View.GONE);
+			sharePhoto2Iv.setVisibility(View.GONE);
+			sharePhoto3Iv.setVisibility(View.GONE);
+			break;
+		}
+	}
+	
 	@Override
 	public void onCheckedChanged(CompoundButton button, boolean checked) {
 		// TODO Auto-generated method stub
@@ -285,24 +292,18 @@ public class PhotoShareActivity extends FragmentActivity implements OnClickListe
 		builder.create().show();
 	}
 	
+	// 删除所有的分享照片
 	private void deleteSharePhotos(){
-		if(sharePhoto1Iv.getVisibility() == View.VISIBLE){
-			deletePhoto((Uri)sharePhoto1Iv.getTag());
-		}
-		if(sharePhoto2Iv.getVisibility() == View.VISIBLE){
-			deletePhoto((Uri)sharePhoto2Iv.getTag());
-		}
-		if(sharePhoto3Iv.getVisibility() == View.VISIBLE){
-			deletePhoto((Uri)sharePhoto3Iv.getTag());
+		for (String url : imageUrlList) {
+			deletePhoto(url);
 		}
 	}
 	
-	private void deletePhoto(Uri uri){
-		if(uri != null){
-			File photo = new File(uri.getPath());
-			if(photo.exists()){
-				photo.delete();
-			}
+	private void deletePhoto(String url){
+		String path = Uri.parse(url).getPath();
+		File photo = new File(path);
+		if(photo.exists()){
+			photo.delete();
 		}
 	}
 	

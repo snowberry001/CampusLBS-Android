@@ -56,5 +56,5 @@ public class BitmapUtil {
         		(int) oldWidth, (int) oldHeight, matrix, true); 
         return newBitmap; 
 	}
-	
+
 }

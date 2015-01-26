@@ -1,21 +1,20 @@
 package com.sky.control;
 
+import java.util.HashMap;
 import java.util.List;
 
-import com.sky.fragment.MyPageFragment;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class MyPagerAdapter extends FragmentStatePagerAdapter{
 	
-	public List<String> imagePathList;
+	public List<HashMap<String, String>> imagePathList;
 	 
-    public MyPagerAdapter(FragmentManager fragmentManager, List<String> imagePathList) {
+    public MyPagerAdapter(FragmentManager fragmentManager, List<HashMap<String,String>> imagePathList) {
         super(fragmentManager);
         this.imagePathList = imagePathList;
     }
@@ -48,7 +47,7 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter{
     
     @Override
     public Fragment getItem(int position) {
-        String url = imagePathList.get(position);
+        String url = imagePathList.get(position).get("imagePath");
         return MyPageFragment.newInstance(url);
     }
     

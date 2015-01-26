@@ -1,5 +1,7 @@
 package com.sky.db;
 
+import com.sky.constant.DBConstant;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -9,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
 	
-	private final static String DATABASE_NAME = "TOUR.db";
+/*	private final static String DATABASE_NAME = "TOUR.db";
 	private final static int DATABASE_VERSION = 1;
 	private final static String TABLE_TOUR = "TOUR";
     private final static String TABLE_PHOTO = "PHOTO";
@@ -36,95 +38,98 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	
 	private SQLiteDatabase readDB = getReadableDatabase();
-	private SQLiteDatabase writeDB = getWritableDatabase();
+	private SQLiteDatabase writeDB = getWritableDatabase();*/
 	
 	
 	public DBHelper(Context context){
-		super(context, DATABASE_NAME, null, DATABASE_VERSION); 
+		super(context, DBConstant.DATABASE_NAME, null, DBConstant.DATABASE_VERSION); 
 	}
 	
-	public DBHelper(Context context, String name, CursorFactory factory,
-			int version) {
+	public DBHelper(Context context, String name, CursorFactory factory, int version) {
 		super(context, name, factory, version);
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 
-		String tout_sql = "CREATE TABLE " + TABLE_TOUR + "(" + TOUR_ID + " INTEGER primary key autoincrement, "
-				+ TOUR_START_TIME + " text,"
-                + TOUR_END_TIME + " text,"
-				+ TOUR_TITLE + " text,"
-                + TOUR_LOCATION + " text,"
-                + TOUR_ACCURATE_LOCALTION + " text,"
-                + TOUR_FILE_URL + " text"
+		String tout_sql = "CREATE TABLE " + DBConstant.TABLE_TOUR + "(" 
+				+ DBConstant.TOUR_ID + " INTEGER primary key autoincrement, "
+				+ DBConstant.TOUR_START_TIME + " text,"
+                + DBConstant.TOUR_END_TIME + " text,"
+				+ DBConstant.TOUR_TITLE + " text,"
+                + DBConstant.TOUR_LOCATION + " text,"
+                + DBConstant.TOUR_ACCURATE_LOCALTION + " text,"
+                + DBConstant.TOUR_FILE_URL + " text"
                 + ");";
 
-        String photo_sql = "CREATE TABLE " + TABLE_PHOTO + "(" + PHOTO_ID + " INTEGER primary key autoincrement, "
-                + PHOTO_TOUR_ID + " integer,"
-                + PHOTO_TIME + " text,"
-                + PHOTO_LOCATION + " text,"
-                + PHOTO_TITLE + " text,"
-                + PHOTO_URL + " text,"
-                + PHOTO_ACCURATE_LOCALTION + " text,"
-                + PHOTO_VOICE_URL + " text"
+        String photo_sql = "CREATE TABLE " + DBConstant.TABLE_PHOTO + "(" 
+        		+ DBConstant.PHOTO_ID + " INTEGER primary key autoincrement, "
+                + DBConstant.PHOTO_TOUR_ID + " integer,"
+                + DBConstant.PHOTO_TIME + " text,"
+                + DBConstant.PHOTO_LOCATION + " text,"
+                + DBConstant.PHOTO_TITLE + " text,"
+                + DBConstant.PHOTO_URL + " text,"
+                + DBConstant.PHOTO_ACCURATE_LOCALTION + " text,"
+                + DBConstant.PHOTO_VOICE_URL + " text"
                 + ");";
 
 		db.execSQL(tout_sql);
         db.execSQL(photo_sql);
     }
 	
-	public void execSql(){
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+		String tour_sql = "DROP TABLE IF EXISTS " + DBConstant.TABLE_TOUR;
+        String photo_sql = "DROP TABLE IF EXISTS " + DBConstant.TABLE_PHOTO;
+		db.execSQL(tour_sql);
+        db.execSQL(photo_sql);
+		onCreate(db);
+	}
+	
+	/*public void execSql(){
 		
-		String tour_sql1 = "DROP TABLE IF EXISTS " + TABLE_TOUR;
-        String photo_sql1 = "DROP TABLE IF EXISTS " + TABLE_PHOTO;
+		String tour_sql1 = "DROP TABLE IF EXISTS " + DBConstant.TABLE_TOUR;
+        String photo_sql1 = "DROP TABLE IF EXISTS " + DBConstant.TABLE_PHOTO;
         writeDB.execSQL(tour_sql1);
         writeDB.execSQL(photo_sql1);
 		
-        String tour_sql = "CREATE TABLE " + TABLE_TOUR + "(" + TOUR_ID + " INTEGER primary key autoincrement, "
-                + TOUR_START_TIME + " text,"
-                + TOUR_END_TIME + " text,"
-                + TOUR_TITLE + " text,"
-                + TOUR_LOCATION + " text,"
-                + TOUR_ACCURATE_LOCALTION + " text,"
-                + TOUR_FILE_URL + " text"
+        String tour_sql = "CREATE TABLE " + DBConstant.TABLE_TOUR + "(" + DBConstant.TOUR_ID + " INTEGER primary key autoincrement, "
+                + DBConstant.TOUR_START_TIME + " text,"
+                + DBConstant.TOUR_END_TIME + " text,"
+                + DBConstant.TOUR_TITLE + " text,"
+                + DBConstant.TOUR_LOCATION + " text,"
+                + DBConstant.TOUR_ACCURATE_LOCALTION + " text,"
+                + DBConstant.TOUR_FILE_URL + " text"
                 + ");";
 
-        String photo_sql = "CREATE TABLE " + TABLE_PHOTO + "(" + PHOTO_ID + " INTEGER primary key autoincrement, "
-                + PHOTO_TOUR_ID + " integer,"
-                + PHOTO_TIME + " text,"
-                + PHOTO_LOCATION + " text,"
-                + PHOTO_TITLE + " text,"
-                + PHOTO_URL + " text,"
-                + PHOTO_ACCURATE_LOCALTION + " text,"
-                + PHOTO_VOICE_URL + " text"
+        String photo_sql = "CREATE TABLE " + DBConstant.TABLE_PHOTO + "(" + DBConstant.PHOTO_ID + " INTEGER primary key autoincrement, "
+                + DBConstant.PHOTO_TOUR_ID + " integer,"
+                + DBConstant.PHOTO_TIME + " text,"
+                + DBConstant.PHOTO_LOCATION + " text,"
+                + DBConstant.PHOTO_TITLE + " text,"
+                + DBConstant.PHOTO_URL + " text,"
+                + DBConstant.PHOTO_ACCURATE_LOCALTION + " text,"
+                + DBConstant.PHOTO_VOICE_URL + " text"
                 + ");";
 
         writeDB.execSQL(tour_sql);
         writeDB.execSQL(photo_sql);
 	}
 	
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-		String tour_sql = "DROP TABLE IF EXISTS " + TABLE_TOUR;
-        String photo_sql = "DROP TABLE IF EXISTS " + TABLE_PHOTO;
-		db.execSQL(tour_sql);
-        db.execSQL(photo_sql);
-		onCreate(db);
-	}
+	
 	
 	// 获取所有的tour记录
 	public Cursor selectAllTour(){
-		Cursor cursor = readDB.query(TABLE_TOUR, null, null, null, null, null, TOUR_START_TIME + " desc");
+		Cursor cursor = readDB.query(DBConstant.TABLE_TOUR, null, null, null, null, null, DBConstant.TOUR_START_TIME + " desc");
 		return cursor;
 	}
 	
 	// 获取指定ID的tour记录
 	public Cursor selectOneTour(String id) {
-		String where = TOUR_ID + "=?";
+		String where = DBConstant.TOUR_ID + "=?";
 		String[] whereValue = { id };
-		Cursor cursor = readDB.query(TABLE_TOUR, null, where, whereValue,  null, null, null);
+		Cursor cursor = readDB.query(DBConstant.TABLE_TOUR, null, where, whereValue,  null, null, null);
 		return cursor;
 	} 
 	
@@ -132,33 +137,33 @@ public class DBHelper extends SQLiteOpenHelper {
 	public long createTour(String startTime, String location, 
 			String title, String accurateLoc) {
         ContentValues cv = new ContentValues();  
-        cv.put(TOUR_TITLE, title);
-        cv.put(TOUR_START_TIME, startTime);
-        cv.put(TOUR_LOCATION, location);        
-        cv.put(TOUR_ACCURATE_LOCALTION, accurateLoc);
-        long row = writeDB.insert(TABLE_TOUR, null, cv);
+        cv.put(DBConstant.TOUR_TITLE, title);
+        cv.put(DBConstant.TOUR_START_TIME, startTime);
+        cv.put(DBConstant.TOUR_LOCATION, location);        
+        cv.put(DBConstant.TOUR_ACCURATE_LOCALTION, accurateLoc);
+        long row = writeDB.insert(DBConstant.TABLE_TOUR, null, cv);
         return row;  
     }  
   
 	// 删除记录
     public void deleteTour(int id) {  
-        String where = TOUR_ID + "=?";  
+        String where = DBConstant.TOUR_ID + "=?";  
 		String[] whereValue = { Integer.toString(id) };
-        writeDB.delete(TABLE_TOUR, where, whereValue);
+        writeDB.delete(DBConstant.TABLE_TOUR, where, whereValue);
     }  
   
     // 更新tour
     public long updateTour(long id, String title, String location, String accurateLoc, String stopTime, String fileUrl) {
-        String where = TOUR_ID + "=?";  
+        String where = DBConstant.TOUR_ID + "=?";  
 		String[] whereValue = { Long.toString(id) };
         ContentValues cv = new ContentValues();  
-        cv.put(TOUR_TITLE, title);
-        cv.put(TOUR_LOCATION, location);
-        cv.put(TOUR_ACCURATE_LOCALTION, accurateLoc);
-        cv.put(TOUR_END_TIME, stopTime);
-        cv.put(TOUR_FILE_URL, fileUrl);
-        long row = writeDB.update(TABLE_TOUR, cv, where, whereValue);
+        cv.put(DBConstant.TOUR_TITLE, title);
+        cv.put(DBConstant.TOUR_LOCATION, location);
+        cv.put(DBConstant.TOUR_ACCURATE_LOCALTION, accurateLoc);
+        cv.put(DBConstant.TOUR_END_TIME, stopTime);
+        cv.put(DBConstant.TOUR_FILE_URL, fileUrl);
+        long row = writeDB.update(DBConstant.TABLE_TOUR, cv, where, whereValue);
         return row;
-    }  
+    }  */
 
 }

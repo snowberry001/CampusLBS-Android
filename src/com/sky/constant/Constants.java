@@ -1,22 +1,17 @@
 package com.sky.constant;
 
-public final class Constants {
+public class Constants {
 
-	public static final String[] IMAGES = new String[] {
-			// Heavy images
-			"https://lh6.googleusercontent.com/-55osAWw3x0Q/URquUtcFr5I/AAAAAAAAAbs/rWlj1RUKrYI/s1024/A%252520Photographer.jpg",
-			"https://lh4.googleusercontent.com/--dq8niRp7W4/URquVgmXvgI/AAAAAAAAAbs/-gnuLQfNnBA/s1024/A%252520Song%252520of%252520Ice%252520and%252520Fire.jpg",
-	};
+	public final static String IMAGE_FOLDER = "/tourCampus/images/";
+	public final static String FILE_FOLDER = "/tourCampus/files/";
 
-	private Constants() {
-	}
-
-	public static class Config {
-		public static final boolean DEVELOPER_MODE = false;
-	}
+	public final static String URI_PREFIX = "file://";
 	
-	public static class Extra {
-		public static final String FRAGMENT_INDEX = "com.nostra13.example.universalimageloader.FRAGMENT_INDEX";
-		public static final String IMAGE_POSITION = "com.nostra13.example.universalimageloader.IMAGE_POSITION";
-	}
+	// 组合图片参数
+	public final static int COMBINE_PHOTO_MAX_COUNT = 4;
+	public final static int COMBINE_PHOTO_WIDTH = 60;
+	public final static int COMBINE_PHOTO_HEIGHT = 60;
+	public final static int COMBINE_PHOTO_ITEM_WIDTH = 28;
+	public final static int COMBINE_PHOTO_ITEM_HEIGHT = 28;
+	
 }

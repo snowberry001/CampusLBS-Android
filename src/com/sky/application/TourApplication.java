@@ -29,7 +29,7 @@ public class TourApplication extends Application {
     public BMapManager mBMapManager = null;
     
     private LocationClient mLocationClient = null;
-	private BDLocationListener myListener = new MyLocationListener();
+	private BDLocationListener myLocationListener = new MyLocationListener();
     
     public String locationMsg = null;
 	public String accurateLoc = null;
@@ -56,7 +56,7 @@ public class TourApplication extends Application {
 	    initImageLoader(getApplicationContext());
 	    
 		mInstance = this;
-		initEngineManager(this);
+		initEngineManager(getApplicationContext());
 	}
 	
     // 初始化imageLoader
@@ -65,12 +65,12 @@ public class TourApplication extends Application {
 				.threadPriority(Thread.NORM_PRIORITY - 2)
 				.denyCacheImageMultipleSizesInMemory()
 				.diskCacheFileNameGenerator(new Md5FileNameGenerator())
-				.diskCacheSize(50 * 1024 * 1024) // 50 Mb
+				.diskCacheSize(50 * 1024 * 1024) 
 				.tasksProcessingOrder(QueueProcessingType.LIFO)
-				.writeDebugLogs() // Remove for release app
+				.writeDebugLogs() 
 				.defaultDisplayImageOptions(options)
 				.build();
-		// Initialize ImageLoader with configuration.
+
 		ImageLoader.getInstance().init(config);
 	}
     
@@ -78,6 +78,7 @@ public class TourApplication extends Application {
     // 初始化百度地图
 	public void initEngineManager(Context context) {
         if (mBMapManager == null) {
+        	System.out.println("-------init baidu map------------------");
             mBMapManager = new BMapManager(context);
             mBMapManager.init(new MyGeneralListener());
         }
@@ -90,7 +91,7 @@ public class TourApplication extends Application {
 	// 开始定位
 	public void startLocation(){
 		mLocationClient = new LocationClient(this);     
-	    mLocationClient.registerLocationListener(myListener);
+	    mLocationClient.registerLocationListener(myLocationListener);
 	    setLocationOption();
 	    mLocationClient.start();
 	    if (mLocationClient.isStarted()) {
@@ -154,6 +155,9 @@ public class TourApplication extends Application {
     static class MyGeneralListener implements MKGeneralListener {
         @Override
         public void onGetNetworkState(int iError) {
+        	
+        	System.out.println(iError + "----------iError in app--------------");
+        	
             if (iError == MKEvent.ERROR_NETWORK_CONNECT) {
                 Toast.makeText(TourApplication.getInstance().getApplicationContext(), "请检查网络连接！",
                         Toast.LENGTH_LONG).show();
@@ -170,8 +174,7 @@ public class TourApplication extends Application {
                 TourApplication.getInstance().m_bKeyRight = false;
                 Toast.makeText(TourApplication.getInstance().getApplicationContext(), "授权Key错误！",
                         Toast.LENGTH_LONG).show();
-            }
-            else{
+            } else{
                 TourApplication.getInstance().m_bKeyRight = true;
             }
         }

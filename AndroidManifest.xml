@@ -72,21 +72,26 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+        <activity
+            android:name="com.sky.activity.TourMapActivity"
+            android:label="@string/title_activity_tour_map">
+        </activity>
         <activity 
             android:name="com.sky.activity.MainActivity" >
         </activity>
         <activity
-            android:name="com.sky.activity.NewTourActivity"
-            android:label="@string/title_activity_new_tour">
+            android:name="com.sky.activity.TourCreateActivity"
+            android:label="@string/title_activity_create_tour">
         </activity>
+        <service 
+            android:name="com.sky.service.LocationService" >            
+        </service>
         <activity
-            android:name="com.sky.activity.LocationActivity"
-            android:label="@string/title_activity_location" >            
+            android:name="com.sky.activity.TourLocationActivity"
+            android:label="@string/title_activity_tour_location" >            
         </activity>
         <service 
             android:name="com.sky.service.LocationSensorService" >            
@@ -102,17 +107,11 @@
             android:label="@string/title_activity_photo_list" >
         </activity>
         <activity
-            android:name="com.sky.activity.PhotoTakenActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_photo_taken"
-            android:theme="@style/FullscreenTheme" >
-        </activity>
-        <activity
             android:name="com.sky.activity.PhotoShareActivity"
             android:label="@string/title_activity_photo_share" >
         </activity>
         <activity
-            android:name="com.sky.activity.SharePhotoViewActivity"
+            android:name="com.sky.activity.PhotoShareViewActivity"
             android:label="@string/title_activity_share_photo_view"
 			android:theme="@style/FullscreenTheme" >
         </activity>

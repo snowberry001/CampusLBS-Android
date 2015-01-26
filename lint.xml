@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
     <issue id="DefaultLocale">
+        <ignore path="src/com/sky/activity/PhotoListActivity.java" />
         <ignore path="src/com/sky/activity/PhotoViewActivity.java" />
     </issue>
     <issue id="NewApi">
         <ignore path="src/com/sky/activity/NewTourActivity.java" />
         <ignore path="src/com/sky/activity/PhotoViewActivity.java" />
+        <ignore path="src/com/sky/control/MyListViewAdapter.java" />
     </issue>
     <issue id="SimpleDateFormat">
+        <ignore path="src/com/sky/activity/NewTourActivity.java" />
         <ignore path="src/com/sky/activity/PhotoShareActivity.java" />
+        <ignore path="src/com/sky/activity/TourCreateActivity.java" />
+        <ignore path="src/com/sky/control/MyListViewAdapter.java" />
+        <ignore path="src/com/sky/util/DateUtil.java" />
+        <ignore path="src/com/sky/util/FileUtil.java" />
     </issue>
 </lint>

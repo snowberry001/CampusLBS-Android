@@ -2,6 +2,7 @@ package com.sky.activity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,7 +16,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
-import android.database.Cursor;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,7 +24,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
-import com.sky.db.DBHelper;
+import com.sky.db.entity.Tour;
+import com.sky.db.service.TourService;
 
 public class TourListActivity extends Activity implements
 		OnItemClickListener, OnItemLongClickListener {
@@ -32,50 +33,50 @@ public class TourListActivity extends Activity implements
 	private ListView listview;
     private TextView noneTourTv;
 	private MyListViewAdapter myListAdapter;
-	private ArrayList<HashMap<String, String>> tourList;
+	private ArrayList<HashMap<String, String>> tourMapList;
 	
-	private DBHelper dbHelper;
-	private ProgressDialog dialog;
-
+	private ProgressDialog loadingDialog;
+	
 	private boolean isExit = false;
+	
+	private TourService tourService;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.tour_list);
+		setContentView(R.layout.tour_list_view);
 		listview = (ListView) findViewById(R.id.tourList);
         noneTourTv = (TextView) findViewById(R.id.noneTour);
-
-        dbHelper = new DBHelper(getApplicationContext());
+        
+        tourService = TourService.getInstacne(getApplicationContext());
+        
         initListView();
 	}
 
 	private void initAdapterData(){
-		Cursor cursor = dbHelper.selectAllTour();
-        if(cursor.getCount() == 0){
+		List<Tour> tourList = tourService.getTourList(null);
+		if(tourList == null || tourList.size() == 0){
             noneTourTv.setVisibility(View.VISIBLE);
         } else {
             noneTourTv.setVisibility(View.GONE);
         }
-		tourList = new ArrayList<HashMap<String, String>>();
+		tourMapList = new ArrayList<HashMap<String, String>>();
 		HashMap<String, String> map;
-		
-		while(cursor.moveToNext()){
+		for(Tour tour : tourList){
 			map = new HashMap<String, String>();
-			map.put("id", cursor.getString(0));
-            map.put("date", cursor.getString(1));
-			map.put("title", cursor.getString(3));
-			map.put("location", cursor.getString(4));
-			map.put("accurateLoc", cursor.getString(5));
-			tourList.add(map);
-		}
+			map.put("id", tour.getTourId());
+            map.put("date", tour.getTourStartTime());
+			map.put("title", tour.getTourTitle());
+			map.put("location", tour.getTourLocation());
+			map.put("accurateLoc", tour.getTourAccurateLocation());
+			tourMapList.add(map);
+		}		
 	}
-	
 
 	private void initListView(){
         initAdapterData();
-		myListAdapter = new MyListViewAdapter(this, tourList);
+		myListAdapter = new MyListViewAdapter(this, tourMapList);
 		listview.setAdapter(myListAdapter);
 		listview.setOnItemClickListener(this);
 		listview.setOnItemLongClickListener(this);
@@ -84,12 +85,11 @@ public class TourListActivity extends Activity implements
 
 	@Override
 	public void onItemClick(AdapterView<?> view, View v, int index, long lg) {
-
-		dialog = ProgressDialog.show(this, "", "正在加载...", true, true);
-		TextView item = (TextView) v.findViewById(R.id.id);
-		String tourId = item.getText().toString();
+		loadingDialog = ProgressDialog.show(this, "", "正在加载...", true, true);
+		TextView tourIdTv = (TextView) v.findViewById(R.id.tourId);
+		String tourId = tourIdTv.getText().toString();
 		Intent intent = new Intent();
-		intent.setClass(this, MainActivity.class);
+		intent.setClass(this, TourMapActivity.class);
 		intent.putExtra("tourId", tourId);
 		startActivity(intent);
 	}
@@ -98,22 +98,23 @@ public class TourListActivity extends Activity implements
 	@Override
 	public boolean onItemLongClick(AdapterView<?> view, View v, int index, long lg) {
 
-		TextView item = (TextView) v.findViewById(R.id.id);
-		String tourId = item.getText().toString();
+		TextView tourIdTv = (TextView) v.findViewById(R.id.tourId);
+		String tourId = tourIdTv.getText().toString();
 		showDialog(tourId);
 		return false;
 	}
 	
 	private void showDialog(final String tourId){
 		Builder builder = new Builder(this);
-		builder.setMessage("确定要删除？");
+		builder.setTitle("提示");
+		builder.setMessage("\n确定要删除？\n");
 		builder.setNegativeButton("取消",null);
 		builder.setPositiveButton("确定",
 				new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
-						dbHelper.deleteTour(Integer.valueOf(tourId));	
+						tourService.deleteTour(Integer.valueOf(tourId));
 						initListView();
 					}
 				});
@@ -123,7 +124,7 @@ public class TourListActivity extends Activity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+
         getMenuInflater().inflate(R.menu.tour_list_menu, menu);
         return true;
     }
@@ -135,7 +136,7 @@ public class TourListActivity extends Activity implements
         Intent intent = new Intent();
         switch (item.getItemId()) {
             case R.id.create:
-                intent.setClass(TourListActivity.this, NewTourActivity.class);
+                intent.setClass(TourListActivity.this, TourCreateActivity.class);
                 startActivity(intent);
                 break;
             default:
@@ -146,6 +147,13 @@ public class TourListActivity extends Activity implements
     
     @Override
 	protected void onResume() {
+
+		//initAdapterData();
+		//myListAdapter.notifyDataSetChanged();
+    	
+    	if(loadingDialog != null && loadingDialog.isShowing()){
+    		loadingDialog.dismiss();
+    	}
 		initListView();
 		super.onResume();
 	}		

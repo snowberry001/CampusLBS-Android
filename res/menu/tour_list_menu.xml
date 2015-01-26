@@ -4,6 +4,6 @@
         android:id="@+id/create"
         android:orderInCategory="100"
         android:showAsAction="always"
-        android:icon="@android:drawable/ic_menu_add"
+        android:icon="@drawable/menu_add_tour"
         android:title="添加"/>
 </menu>

@@ -1,38 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">CampusLBS</string>
+    <string name="app_name">途片</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+
     <string name="btn_start">开始</string>
     <string name="btn_stop">停止</string>
-    <string name="empty_text">暂无出行记录</string>
-    <string name="title_activity_new_tour">新建</string>
-    <string name="title_activity_photo_view">查看照片</string>
-    <string name="title_activity_location">选择位置</string>
-    <string name="description">take photo during touring</string>
-    <string name="title_activity_photo_list">浏览照片</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_photo_taken">拍照浏览</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    
+    <string name="empty_tour_sign">没有记录</string>
+    <string name="empty_photo_sign">没有照片</string>
+    
+    <string name="title_activity_create_tour">新建</string>
+    
+    <string name="title_activity_tour_map">地图展示</string>
+    <string name="title_activity_tour_location">选择位置</string>
+    <string name="my_location">我的位置</string>
+        
+    <string name="title_activity_photo_view">浏览照片</string>
+    <string name="title_activity_photo_list">查看相册</string>
+
     <string name="title_activity_photo_share">分享</string>
     <string name="complete">完成</string>
-    <string name="my_location">我的位置</string>
+    
     <string name="title_activity_share_photo_view">查看照片</string>
     <string name="delete">删除</string>
 	
-    <string name="menu_item_clear_memory_cache">Clear memory cache</string>
-	<string name="menu_item_clear_disc_cache">Clear disc cache</string>
-	<string name="menu_item_pause_on_scroll">Pause on scroll</string>
-	<string name="menu_item_pause_on_fling">Pause on fling</string>
-	
-	<string name="ac_name_image_list">Image List Example</string>
-	<string name="ac_name_image_grid">Image Grid Example</string>
-	<string name="ac_name_image_pager">Image Pager Example</string>
-	<string name="ac_name_image_gallery">Image Gallery Example</string>
-	
-	<!-- Content descriptions -->
 	<string name="descr_image">Image</string>
     
 </resources>
